@@ -17,21 +17,21 @@ The Farmer DNS Service handles DNS ACME validation for LE, helps a farmer verify
 
 ## Scope
 
-### Validation Service
+### Farmer DNS Service
 
-This service should only be responsible for the following...
+This service should only be responsible for the following:
 
 + Validating a farmer's NodeID
   + Validated by having the farmer sign the value of a TXT record with their private key
 + Creating a DNS A record for the Farmer using their nodeid as the hostname on the storj.farm domain
 + Creating a DNS TXT record using the gcloud API
-+ Wait for confirmation that the user has successfully validated and received their SSL certificates
-+ Confirming that the users HTTPS server is reachable, working properly, and using a valid certificate
-+ Clean up TXT records either after success confirmation or a set timeout
++ Confirm that a farmer is reachable over HTTPS at the DNS entry we created.
+
+The intention here is to separate all knowledge of SSL and LE from the Farmer DNS Service, making the farmer responsible for it's own certificate. Since we are a TLD, this seems to be the most natural approach to things.
 
 ### Storj Share
 
-The additions to the Storj Share service should only include the following
+The additions to the Storj Share service should only include the following:
 
 + Submitting a request to LE requesting a certificate for the DNS name [nodeid].storj.farm
   + the storj.farm domain should be a configurable parameter
@@ -39,9 +39,8 @@ The additions to the Storj Share service should only include the following
 + Sending an HTTP request with the value of the TXT challenge given by LE signed with the farmer's private key
 + Saving the certificate provided by LE after successful validation
 + Setting up a local webserver capable of serving over SSL using the certificates retrieved from LE
-+ Notifying the Validation Service that it has obtained a certificate and that it is working properly
-+ Accepting a request from the Validation Service over the HTTPS server confirming that it's SSL is properly configured
-
++ Request that the Farmer DNS Service validate that it is reachable over HTTPS at it's DNS entry
++ Accept an HTTPS request from the Farmer DNS Service for validation
 
 ## Implementation
 
